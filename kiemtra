@@ -16,25 +16,6 @@ namespace De1
         {
             InitializeComponent();
         }
-        private void LoadSinhVienList()
-        {
-            lvSinhvien.Items.Clear();
-            var sinhviens = GetSinhVienList();
-
-            foreach (var sv in sinhviens)
-            {
-                ListViewItem item = new ListViewItem(sv.MaSV);
-                item.SubItems.Add(sv.HoTenSV);
-                item.SubItems.Add(sv.MaLop);
-                item.SubItems.Add(sv.NgaySinh.ToShortDateString());
-                lvSinhvien.Items.Add(item);
-            }
-        }
-        private void FrmSinhVien_Load(object sender, EventArgs e)
-        {
-            LoadSinhVienList();
-            LoadLopList();
-        }
         private void LoadLopList()
         {
             cboLop.DataSource = GetLopList(); // Hàm GetLopList trả về danh sách lớp
@@ -45,18 +26,18 @@ namespace De1
         private List<SinhVien> GetSinhVienList()
         {
             return new List<SinhVien>
-    {
-        new SinhVien { MaSV = "SV0001", HoTenSV = "Nguyễn Văn A", MaLop = "L01", NgaySinh = new DateTime(2000, 1, 1) },
-        new SinhVien { MaSV = "SV0002", HoTenSV = "Trần Thị B", MaLop = "L02", NgaySinh = new DateTime(2001, 2, 15) }
-    };
+{
+    new SinhVien { MaSV = "SV0001", HoTenSV = "Nguyễn Văn A", MaLop = "L01", NgaySinh = new DateTime(2000, 1, 1) },
+    new SinhVien { MaSV = "SV0002", HoTenSV = "Trần Thị B", MaLop = "L02", NgaySinh = new DateTime(2001, 2, 15) }
+};
         }
         private List<Lop> GetLopList()
         {
             return new List<Lop>
-    {
-        new Lop { MaLop = "L01", TenLop = "Lớp 1" },
-        new Lop { MaLop = "L02", TenLop = "Lớp 2" }
-    };
+{
+    new Lop { MaLop = "L01", TenLop = "Lớp 1" },
+    new Lop { MaLop = "L02", TenLop = "Lớp 2" }
+};
         }
 
         public class Lop
@@ -64,33 +45,57 @@ namespace De1
             public string MaLop { get; set; }
             public string TenLop { get; set; }
         }
-      
+
         private void btThem_Click(object sender, EventArgs e)
         {
-            lblMaSV.Text = "";
-            lblHoTen.Text = "";
-            txtNgaySinh.Value = DateTime.Now;
-            cboLop.SelectedIndex = -1;        // ComboBox
-            cboLop.Text = "";
+            // Thêm một sinh viên mới vào DataGridView
+            if (!string.IsNullOrEmpty(lblMaSV.Text) && !string.IsNullOrEmpty(lblHoTen.Text) && cboLop.SelectedValue != null)
+            {
+                dataGridView1.Rows.Add(lblMaSV.Text, lblHoTen.Text, cboLop.SelectedValue.ToString(), lblNgaySinh.Text);
+                MessageBox.Show("Thêm sinh viên thành công!", "Thông báo");
+            }
+            else
+            {
+                MessageBox.Show("Vui lòng nhập đầy đủ thông tin sinh viên!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void btXoa_Click(object sender, EventArgs e)
         {
-            if (lvSinhvien.SelectedItems.Count > 0)
+            // Xóa dòng được chọn trong DataGridView
+            if (dataGridView1.SelectedRows.Count > 0)
             {
-                lvSinhvien.Items.Remove(lvSinhvien.SelectedItems[0]);
+                foreach (DataGridViewRow row in dataGridView1.SelectedRows)
+                {
+                    if (!row.IsNewRow)
+                    {
+                        dataGridView1.Rows.Remove(row);
+                    }
+                }
+                MessageBox.Show("Xóa sinh viên thành công!", "Thông báo");
+            }
+            else
+            {
+                MessageBox.Show("Vui lòng chọn một dòng để xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
         private void btSua_Click(object sender, EventArgs e)
         {
-            if (lvSinhvien.SelectedItems.Count > 0)
+            // Sửa thông tin sinh viên trong DataGridView
+            if (dataGridView1.SelectedRows.Count == 1)
             {
-                ListViewItem item = lvSinhvien.SelectedItems[0];
-                lblMaSV.Text = item.SubItems[0].Text;
-                lblHoTenSV.Text = item.SubItems[1].Text;
-                cbo.Text = item.SubItems[2].Text;
-                dtNgaySinh.Value = DateTime.Parse(item.SubItems[3].Text);
+                DataGridViewRow selectedRow = dataGridView1.SelectedRows[0];
+                selectedRow.Cells[0].Value = lblMaSV.Text;         // Mã sinh viên
+                selectedRow.Cells[1].Value = lblHoTen.Text;        // Họ tên
+                selectedRow.Cells[2].Value = cboLop.SelectedValue; // Mã lớp
+                selectedRow.Cells[3].Value = lblNgaySinh.Text;     // Ngày sinh
+
+                MessageBox.Show("Cập nhật thông tin thành công!", "Thông báo");
+            }
+            else
+            {
+                MessageBox.Show("Vui lòng chọn một dòng để sửa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -110,7 +115,7 @@ namespace De1
             this.Close();
         }
 
-     
+
 
         private void lvSinhvien_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -132,17 +137,27 @@ namespace De1
                 lvSinhvien.Items.Add(item);
             }
         }
-       
+
         private void cboLop_SelectedIndexChanged(object sender, EventArgs e)
         {
             string selectedClass = cboLop.SelectedValue.ToString();
             Console.WriteLine("Đã chọn lớp: " + selectedClass);
         }
 
-       
-
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Hiển thị dữ liệu của dòng được chọn lên các TextBox
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
+                lblMaSV.Text = row.Cells[0].Value?.ToString();
+                lblHoTen.Text = row.Cells[1].Value?.ToString();
+                cboLop.SelectedValue = row.Cells[2].Value?.ToString();
+                lblNgaySinh.Text = row.Cells[3].Value?.ToString();
+            }
         }
-    
+    }
+
 
 
 }
