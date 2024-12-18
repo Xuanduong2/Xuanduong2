@@ -1,0 +1,148 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace De1
+{
+    public partial class FrmSinhVien : Form
+    {
+        public FrmSinhVien()
+        {
+            InitializeComponent();
+        }
+        private void LoadSinhVienList()
+        {
+            lvSinhvien.Items.Clear();
+            var sinhviens = GetSinhVienList();
+
+            foreach (var sv in sinhviens)
+            {
+                ListViewItem item = new ListViewItem(sv.MaSV);
+                item.SubItems.Add(sv.HoTenSV);
+                item.SubItems.Add(sv.MaLop);
+                item.SubItems.Add(sv.NgaySinh.ToShortDateString());
+                lvSinhvien.Items.Add(item);
+            }
+        }
+        private void FrmSinhVien_Load(object sender, EventArgs e)
+        {
+            LoadSinhVienList();
+            LoadLopList();
+        }
+        private void LoadLopList()
+        {
+            cboLop.DataSource = GetLopList(); // Hàm GetLopList trả về danh sách lớp
+            cboLop.DisplayMember = "TenLop";  // Hiển thị tên lớp
+            cboLop.ValueMember = "MaLop";     // Giá trị thực sự là mã lớp
+        }
+
+        private List<SinhVien> GetSinhVienList()
+        {
+            return new List<SinhVien>
+    {
+        new SinhVien { MaSV = "SV0001", HoTenSV = "Nguyễn Văn A", MaLop = "L01", NgaySinh = new DateTime(2000, 1, 1) },
+        new SinhVien { MaSV = "SV0002", HoTenSV = "Trần Thị B", MaLop = "L02", NgaySinh = new DateTime(2001, 2, 15) }
+    };
+        }
+        private List<Lop> GetLopList()
+        {
+            return new List<Lop>
+    {
+        new Lop { MaLop = "L01", TenLop = "Lớp 1" },
+        new Lop { MaLop = "L02", TenLop = "Lớp 2" }
+    };
+        }
+
+        public class Lop
+        {
+            public string MaLop { get; set; }
+            public string TenLop { get; set; }
+        }
+      
+        private void btThem_Click(object sender, EventArgs e)
+        {
+            lblMaSV.Text = "";
+            lblHoTen.Text = "";
+            txtNgaySinh.Value = DateTime.Now;
+            cboLop.SelectedIndex = -1;        // ComboBox
+            cboLop.Text = "";
+        }
+
+        private void btXoa_Click(object sender, EventArgs e)
+        {
+            if (lvSinhvien.SelectedItems.Count > 0)
+            {
+                lvSinhvien.Items.Remove(lvSinhvien.SelectedItems[0]);
+            }
+        }
+
+        private void btSua_Click(object sender, EventArgs e)
+        {
+            if (lvSinhvien.SelectedItems.Count > 0)
+            {
+                ListViewItem item = lvSinhvien.SelectedItems[0];
+                lblMaSV.Text = item.SubItems[0].Text;
+                lblHoTenSV.Text = item.SubItems[1].Text;
+                cbo.Text = item.SubItems[2].Text;
+                dtNgaySinh.Value = DateTime.Parse(item.SubItems[3].Text);
+            }
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            foreach (ListViewItem item in lvSinhvien.Items)
+            {
+                if (!item.SubItems[1].Text.Contains(lblHoTenSV.Text))
+                    item.BackColor = SystemColors.ControlLight;
+                else
+                    item.BackColor = Color.White;
+            }
+        }
+
+        private void btThoat_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+     
+
+        private void lvSinhvien_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lvSinhvien.Items.Clear(); // Xóa tất cả các item cũ trong ListView
+
+            var sinhviens = GetSinhVienList(); // Lấy danh sách sinh viên từ hàm GetSinhVienList
+
+            // Duyệt qua danh sách sinh viên và thêm từng sinh viên vào ListView
+            foreach (var sv in sinhviens)
+            {
+                // Tạo một item mới với mã sinh viên
+                ListViewItem item = new ListViewItem(sv.MaSV);
+                // Thêm các thông tin khác vào các cột
+                item.SubItems.Add(sv.HoTenSV);
+                item.SubItems.Add(sv.MaLop);
+                item.SubItems.Add(sv.NgaySinh.ToShortDateString()); // Định dạng ngày sinh theo kiểu ngắn (dd/MM/yyyy)
+
+                // Thêm item vào ListView
+                lvSinhvien.Items.Add(item);
+            }
+        }
+       
+        private void cboLop_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selectedClass = cboLop.SelectedValue.ToString();
+            Console.WriteLine("Đã chọn lớp: " + selectedClass);
+        }
+
+       
+
+        }
+    
+
+
+}
